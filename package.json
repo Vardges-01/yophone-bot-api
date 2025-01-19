@@ -2,8 +2,12 @@
   "name": "yophone-bot-api",
   "version": "0.0.1",
   "description": "YoPhone Client for Node/Typescript",
-  "homepage": "https://yoai.yophone.com",
   "main": "dist/index.js",
+  "homepage": "https://yoai.yophone.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Vardges-01/yophone-bot-api"
+  },
   "types": "./typings/index.d.ts",
   "files": [
     "src/**/*.ts",
