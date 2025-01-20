@@ -4,13 +4,26 @@ export declare class Bot {
     private middlewares;
     private botClient;
     constructor(token: string);
-    start(handler: (ctx: Context) => Promise<void>): void;
-    help(handler: (ctx: Context) => Promise<void>): void;
-    command(command: string, handler: (ctx: Context) => Promise<void>): void;
-    on(filter: string | FilterFn, handler: (ctx: Context) => Promise<void>): void;
+    /**
+     * Add a middleware to the chain.
+     * @param middleware Middleware function to add.
+     */
+    use(middleware: Middleware): void;
+    start(handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void;
+    help(handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void;
+    command(command: string, handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void;
+    on(filter: string | FilterFn, handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void;
+    hears(pattern: string | RegExp, handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void;
     lounch(): void;
-    use(handler: Middleware): void;
+    /**
+     * Run the middleware chain.
+     * @param ctx Context object passed to middlewares.
+     */
     private runMiddlewares;
+    /**
+     * Handle messages from Bot
+     * @param update Message info.
+     */
     private handleMessage;
     private _getUpdates;
 }
