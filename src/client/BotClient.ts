@@ -16,17 +16,17 @@ export class BotClient {
         } as CreateAxiosDefaults);
     }
 
-    async sendMessage(to: string, text: string): Promise<void> {
-        await this.client.post("/sendMessage", { to, text });
+    async sendMessage(chatId: string, text: string): Promise<void> {
+        await this.client.post("/sendMessage", { chatId, text });
     }
 
-    async sendPhoto(to: string, text: string, photo: string): Promise<void> {
+    async sendPhoto(chatId: string, text: string, photo: string): Promise<void> {
         if(!fs.existsSync(photo)){
             throw "File is not found at path " + photo
         }
 
         const formdata = new FormData();
-        formdata.append("to", to);
+        formdata.append("to", chatId);
         formdata.append("text", text);
         formdata.append("file", fs.createReadStream(photo), photo);
 

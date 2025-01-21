@@ -1,7 +1,7 @@
 import { BotClient } from "../client/BotClient";
 import { Context as IContext } from "../context/Context";
 import { FilterFn } from "../filters";
-import { Context, Middleware } from "../types";
+import { Context, Middleware, Update } from "../types";
 import { getTextType, wait } from "../utils";
 
 export class Bot {
@@ -13,49 +13,55 @@ export class Bot {
         this.botClient = new BotClient(token);
     }
 
-    start(handler: (ctx: Context) => Promise<void>): void {
-        this.middlewares.push(async (ctx, next) => {
+    /**
+     * Add a middleware to the chain.
+     * @param middleware Middleware function to add.
+     */
+    use(middleware: Middleware): void {
+        this.middlewares.push(middleware);
+    }
+
+    start(handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void {
+        this.use(async (ctx, next) => {
             if (ctx.content === ("/start")) {
-                await handler(ctx);
+                await handler(ctx, next);
             } else {
                 await next();
             }
         });
     }
 
-    help(handler: (ctx: Context) => Promise<void>): void {
-        this.middlewares.push(async (ctx, next) => {
+    help(handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void {
+        this.use(async (ctx, next) => {
             if (ctx.content === ("/help")) {
-                await handler(ctx);
+                await handler(ctx, next);
             } else {
                 await next();
             }
         });
     }
 
-    command(command: string, handler: (ctx: Context) => Promise<void>): void {
-        this.middlewares.push(async (ctx, next) => {
+    command(command: string, handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void {
+        this.use(async (ctx, next) => {
             if (ctx.content.startsWith("/")) {
                 const commandName = ctx.content.substring(1).trim();
                 if (command === commandName) {
-                    await handler(ctx);
-                } else {
-                    await next();
+                    await handler(ctx, next);
+                    return;
                 }
-            } else {
-                await next();
             }
+            await next();
         });
     }
 
-    on(filter: string | FilterFn, handler: (ctx: Context) => Promise<void>): void {
-        this.middlewares.push(async (ctx, next) => {
+    on(filter: string | FilterFn, handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void {
+        this.use(async (ctx, next) => {
             const shouldHandle = typeof filter === 'string'
                 ? ctx.type === filter
                 : filter(ctx);
 
             if (shouldHandle) {
-                await handler(ctx);
+                await handler(ctx, next);
             }
             else {
                 await next();
@@ -63,26 +69,52 @@ export class Bot {
         });
     }
 
+    hears(pattern: string | RegExp, handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void {
+        this.use(async (ctx, next) => {
+            if (typeof pattern === 'string') {
+                if (ctx.content === pattern) {
+                    await handler(ctx, next);
+                    return;
+                }
+            } else if (pattern instanceof RegExp) {
+                if (pattern.test(ctx.content)) {
+                    await handler(ctx, next);
+                    return;
+                }
+            }
+            await next();
+        });
+    }
+
+
     lounch(): void {
         this._getUpdates();
         console.log('BOT started...')
     }
 
-    use(handler: Middleware): void {
-        this.middlewares.push(handler);
-    }
-
+    /**
+     * Run the middleware chain.
+     * @param ctx Context object passed to middlewares.
+     */
     private async runMiddlewares(ctx: Context): Promise<void> {
-        const next = async (index: number) => {
+        let index = 0;
+
+        const next = async (): Promise<void> => {
             if (index < this.middlewares.length) {
                 const middleware = this.middlewares[index];
-                await middleware(ctx, () => next(index + 1));
+                index++;
+                await middleware(ctx, next);
             }
         };
-        await next(0);
+
+        await next();
     }
 
-    private async handleMessage(update: any): Promise<void> {
+    /**
+     * Handle messages from Bot
+     * @param update Message info.
+     */
+    private async handleMessage(update: Update): Promise<void> {
         const { text, sender } = update;
 
         let messageTextReceived = Buffer.from(text, "base64").toString("utf-8");
