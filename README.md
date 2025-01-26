@@ -37,14 +37,21 @@ bot.command('start', async (ctx) => {
   await ctx.reply('Hello! I am a YoPhone bot.');
 });
 
-// Handle regular messages
-bot.on('text', async (ctx) => {
+// Handle regular messages (last update) "text" => "message"
+bot.on('message', async (ctx, next) => {
   await ctx.reply('I reply your message: ' + ctx.content);
+  next();
 });
 
 // Handle regular messages by filter  ( BETA )
 bot.on('message('text' | 'emoji'), async (ctx) => {
   await ctx.reply('I reply your message: ' + ctx.content);
+});
+
+// Setting up a listener for bot messages
+bot.hears('Hello' | /Hello/, (ctx) => {
+  // This handler will be triggered if the user sends the message "Hello"
+  ctx.reply('Hello! How are you?');
 });
 
 // Send photos
@@ -54,6 +61,18 @@ bot.command('photo', async (ctx) => {
 
 // Start the bot
 bot.lounch();
+```
+
+## Update
+
+Now you can use **ctx.yoPhone.sendMessage(chatId, text)** to send message by Chat Id.
+
+```typescript
+bot.on('message', async (ctx, next) => {
+  const chatId = ctx.update.chatId;
+  await ctx.yoPhone.sendMessage(chatId, 'Your message!');
+});
+
 ```
 
 ## Features
