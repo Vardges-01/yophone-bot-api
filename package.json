@@ -1,6 +1,6 @@
 {
   "name": "yophone-bot-api",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "YoPhone Client for Node/Typescript",
   "main": "dist/index.js",
   "homepage": "https://yoai.yophone.com",
