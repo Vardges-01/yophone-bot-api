@@ -1,12 +1,12 @@
-import { BotClient } from "../client/BotClient";
+import { YoPhoneClient } from "../client/YoPhoneClient";
 import { Context as IContext, Sender, Update } from "../types";
 export declare class Context implements IContext {
     update: Update;
     content: string;
     sender: Sender;
     type: string;
-    private botClient;
-    constructor(update: Update, content: string, sender: Sender, botClient: BotClient);
+    yoPhone: YoPhoneClient;
+    constructor(update: Update, content: string, sender: Sender, yoPhoneClient: YoPhoneClient);
     reply(text: string): Promise<void>;
     replyWithPhoto(photo: string): Promise<void>;
 }

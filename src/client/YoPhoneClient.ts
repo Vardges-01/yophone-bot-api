@@ -2,7 +2,7 @@ import axios, { AxiosInstance, CreateAxiosDefaults } from "axios";
 import fs from "fs";
 import FormData from "form-data";
 
-export class BotClient {
+export class YoPhoneClient {
   client: AxiosInstance;
 
   constructor(token: string) {

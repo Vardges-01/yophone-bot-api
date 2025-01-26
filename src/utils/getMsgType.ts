@@ -3,7 +3,7 @@ const isEmoji = (char: string): boolean => {
     return emojiRegex.test(char);
 };
 
-export const getTextType = (text: string): 'text' | 'emoji' => {
+export const getTextType = (text: string): 'text' | 'emoji' | 'message' => {
     const chars = Array.from(text);
     let hasText = false;
     let hasEmoji = false;
@@ -16,7 +16,7 @@ export const getTextType = (text: string): 'text' | 'emoji' => {
         }
 
         if (hasText && hasEmoji) {
-            return 'text';
+            return 'message';
         }
     }
 

@@ -1,1 +1,1 @@
-{"version":3,"file":"getMsgType.d.ts","sourceRoot":"","sources":["../../src/utils/getMsgType.ts"],"names":[],"mappings":"AAKA,eAAO,MAAM,WAAW,SAAU,MAAM,KAAG,MAAM,GAAG,OAqBnD,CAAC"}
+{"version":3,"file":"getMsgType.d.ts","sourceRoot":"","sources":["../../src/utils/getMsgType.ts"],"names":[],"mappings":"AAKA,eAAO,MAAM,WAAW,SAAU,MAAM,KAAG,MAAM,GAAG,OAAO,GAAG,SAqB7D,CAAC"}

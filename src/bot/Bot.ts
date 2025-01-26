@@ -1,4 +1,4 @@
-import { BotClient } from "../client/BotClient";
+import { YoPhoneClient } from "../client/YoPhoneClient";
 import { Context as IContext } from "../context/Context";
 import { FilterFn } from "../filters";
 import { Context, Middleware, Update } from "../types";
@@ -6,11 +6,11 @@ import { getTextType, wait } from "../utils";
 
 export class Bot {
     private middlewares: Middleware[];
-    private botClient: BotClient;
+    private yoPhoneClient: YoPhoneClient;
 
     constructor(token: string) {
         this.middlewares = [];
-        this.botClient = new BotClient(token);
+        this.yoPhoneClient = new YoPhoneClient(token);
     }
 
     /**
@@ -21,7 +21,7 @@ export class Bot {
         this.middlewares.push(middleware);
     }
 
-    start(handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void {
+    start(handler: (ctx: Context, next: () => Promise<void>) => Promise<void> | void): void {
         this.use(async (ctx, next) => {
             if (ctx.content === ("/start")) {
                 await handler(ctx, next);
@@ -31,7 +31,7 @@ export class Bot {
         });
     }
 
-    help(handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void {
+    help(handler: (ctx: Context, next: () => Promise<void>) => Promise<void> | void): void {
         this.use(async (ctx, next) => {
             if (ctx.content === ("/help")) {
                 await handler(ctx, next);
@@ -41,7 +41,7 @@ export class Bot {
         });
     }
 
-    command(command: string, handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void {
+    command(command: string, handler: (ctx: Context, next: () => Promise<void>) => Promise<void> | void): void {
         this.use(async (ctx, next) => {
             if (ctx.content.startsWith("/")) {
                 const commandName = ctx.content.substring(1).trim();
@@ -54,10 +54,10 @@ export class Bot {
         });
     }
 
-    on(filter: string | FilterFn, handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void {
+    on(filter: string | FilterFn, handler: (ctx: Context, next: () => Promise<void>) => Promise<void> | void): void {
         this.use(async (ctx, next) => {
             const shouldHandle = typeof filter === 'string'
-                ? ctx.type === filter
+                ? filter == 'message'
                 : filter(ctx);
 
             if (shouldHandle) {
@@ -69,7 +69,7 @@ export class Bot {
         });
     }
 
-    hears(pattern: string | RegExp, handler: (ctx: Context, next: () => Promise<void>) => Promise<void>): void {
+    hears(pattern: string | RegExp, handler: (ctx: Context, next: () => Promise<void>) => Promise<void> | void): void {
         this.use(async (ctx, next) => {
             if (typeof pattern === 'string') {
                 if (ctx.content === pattern) {
@@ -119,13 +119,13 @@ export class Bot {
 
         let messageTextReceived = Buffer.from(text, "base64").toString("utf-8");
 
-        const ctx = new IContext({ ...update, type: getTextType(messageTextReceived) }, messageTextReceived, sender, this.botClient);
+        const ctx = new IContext({ ...update, type: getTextType(messageTextReceived) }, messageTextReceived, sender, this.yoPhoneClient);
         await this.runMiddlewares(ctx);
     }
 
     private async _getUpdates(): Promise<void> {
         try {
-            const data = await this.botClient.getUpdates();
+            const data = await this.yoPhoneClient.getUpdates();
 
             if (data.status === 200) {
                 data.data.data.forEach((m: any) => {
